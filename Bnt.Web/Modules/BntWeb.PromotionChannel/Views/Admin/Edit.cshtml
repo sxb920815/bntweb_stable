@@ -1,0 +1,52 @@
+﻿@using System.Web.Optimization
+@using BntWeb.FileSystems.Media
+@using BntWeb.MemberBase
+@using BntWeb.MemberBase.Models
+@{
+    ViewBag.Title = PromotionChannelModule.DisplayName;
+    ViewBag.SubTitle = "编辑渠道";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model BntWeb.PromotionChannel.Models.Channel
+    <form class="form-horizontal" role="form" id="ChannelForm" action="@Url.Action("EditOnPost", "Admin", new { area = PromotionChannelModule.Area })">
+        <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+        <div class="form-group">
+            <label class="col-sm-1 control-label no-padding-right" for="Name"> 渠道名称 </label>
+            <div class="col-sm-9">
+                <div class="clearfix">
+                    <input type="text" id="Name" name="Name" placeholder="渠道名称" style="width: 300px;" value="@Model.Name" />
+                </div>
+            </div>
+        </div>
+
+        <div class="clearfix form-actions">
+            <div class="col-md-offset-3 col-md-9">
+                <button class="btn btn-info" type="submit">
+                    <i class="icon-ok bigger-110"></i>
+                    保存
+                </button>
+            </div>
+        </div>
+    </form>
+    @section Scripts {
+        @Scripts.Render("~/js/admin/jquery-form")
+        <script type="text/javascript">
+            jQuery(function ($) {
+                bntToolkit.initForm($("#ChannelForm"), {
+                    Name: {
+                        required: true
+                    }
+                }, null, success);
+            });
+
+            // post-submit callback
+            function success(result, statusText, xhr, $form) {
+                if (!result.Success) {
+                    bntToolkit.error(result.ErrorMessage);
+                } else {
+                    location.href = "@Url.Action("List", "Admin", new {area = PromotionChannelModule.Area })";
+                }
+            }
+
+        </script>
+    }

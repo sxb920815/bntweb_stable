@@ -1,0 +1,104 @@
+﻿
+@{
+    ViewBag.Title = HelpCenterModule.DisplayName;
+    ViewBag.SubTitle = "帮助分类";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var addChild = ViewBag.ParentId != Guid.Empty;
+    var addRoot = (bool)ViewBag.AddRoot;
+}
+
+@using System.Web.Optimization
+@using BntWeb.FileSystems.Media
+@model BntWeb.HelpCenter.Models.HelpCategory
+@section Styles {
+    @Styles.Render("~/css/ztree")
+    <style type="text/css">
+        .ace-thumbnails > li {
+            border: 1px solid #ddd;
+        }
+    </style>
+}
+
+<form class="form-horizontal" method="POST" role="form" id="CategoryInfoForm" action="@Url.Action("EditCategoryOnPost", "Admin", new {area = HelpCenterModule.Area})">
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="Parent"> 上级分类 </label>
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <input type="text" id="MergerId" name="MergerId" readonly="readonly" class="col-sm-6" style="display: none;" value="@(addRoot?"00000000-0000-0000-0000-000000000000":(!addChild?Model.MergerId:Model.MergerId + "," + Model.ParentId))"/>
+                <input type="text" id="MergerTypeName" name="MergerTypeName" readonly="readonly" class="col-sm-6" style="display: none;" value="@(addRoot?"顶级":(!addChild?Model.MergerTypeName:Model.MergerTypeName + ">>"+Model.Name))"/>
+                <input type="text" id="Parent" name="Parent" readonly="readonly" class="col-sm-6" value="@(addRoot?"顶级":(!addChild?Model.MergerTypeName:Model.MergerTypeName + ">>"+Model.Name))"/>
+                <input type="hidden" id="Id" name="Id" value="@(!addChild ? Model.Id : Guid.Empty)"/>
+                <input type="hidden" id="ParentId" name="ParentId" value="@Model.ParentId" />
+            </div>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="CategoryName"> 名称 </label>
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <input type="text" id="CategoryName" name="CategoryName" placeholder="名称" class="col-sm-4" value="@(!addChild?Model.Name:"")"/>
+            </div>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right"> 分类图标 </label>
+        <div class="col-sm-8 image">
+            <div class="col-sm-10">
+                @Html.Action("UploadPartial", "File", new { area = "SystemSettings", controlId = "HelpCategoryLogo", isPublic = false, sourceId = Model.Id, moduleKey = HelpCenterModule.Key, sourceType = "HelpCategoryLogo", fileType = FileType.Image, mediumThumbnailWidth = 100, mediumThumbnailHeight = 100, smallThumbnailWidth = 58, smallThumbnailHeight = 58 })
+            </div>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="Sort"> 排序 </label>
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <input type="text" id="Sort" name="Sort" placeholder="排序" class="col-sm-4" value="@(!addChild?Model.Sort.ToString():"")"/>
+            </div>
+        </div>
+    </div>
+    <div class="clearfix">
+        <div class="col-md-offset-1 col-md-9">
+            <button class="btn btn-info" type="submit">
+                <i class="icon-ok bigger-110"></i>
+                保存
+            </button>
+            <button class="btn" type="reset">
+                <i class="icon-undo bigger-110"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @Scripts.Render("~/js/admin/jquery-form")
+    <script type="text/javascript">
+        var url_load="@Url.Action("", "Admin", new {area = HelpCenterModule.Area })";
+
+        jQuery(function($) {
+            bntToolkit.initForm($("#CategoryInfoForm"), {
+                Content: {
+                    required: true
+                },
+                Sort: {
+                    required: true,
+                    digits: true
+                }
+            }, null, success);
+        });
+
+        function success(result, statusText, xhr, $form) {
+            if (!result.Success) {
+                bntToolkit.error(result.ErrorMessage);
+            } else {
+                location.href = "@Url.Action("CategoryList", "Admin", new {area = HelpCenterModule.Area})";
+            }
+        }
+
+
+    </script>
+    @Scripts.Render("~/js/admin/helpcenter/categoryedit")
+}

@@ -1,0 +1,115 @@
+﻿@using System.Web.Optimization
+@using BntWeb.HelpCenter.Models
+@using BntWeb.FileSystems.Media
+@using BntWeb.Security.Identity
+@{
+    ViewBag.Title = HelpCenterModule.DisplayName;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var isView = (bool)ViewBag.IsView;
+    var isCreate = (bool)ViewBag.IsCreate;
+    if (isView)
+    {
+        ViewBag.SubTitle = "查看帮助";
+    }
+    else
+    {
+        if (isCreate)
+        {
+            ViewBag.SubTitle = "新增帮助";
+        }
+        else
+        {
+            ViewBag.SubTitle = "编辑帮助";
+        }
+    }
+}
+@model Help
+@section Styles {
+    @Styles.Render("~/css/ztree")
+    <style type="text/css">
+        .ace-thumbnails > li {
+            border: 1px solid #ddd;
+        }
+    </style>
+}
+
+<form class="form-horizontal" role="form" method="POST" id="HelpForm" action="@Url.Action("EditOnPost", "Admin", new { area = HelpCenterModule.Area })">
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="TypeName"> 分类 </label>
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <input type="text" id="CategoryNames" name="CategoryNames" placeholder="" @(isView ? "" : "onclick=showMenu();") class="col-xs-10 col-sm-3" readonly value="@ViewBag.CategoryNames"/>
+                <input type="text" id="CategoryIds" name="CategoryIds" placeholder="" style="display: none;" value="@ViewBag.CategoryIds"/>
+            </div>
+        </div>
+    </div>
+    <div id="menuContent" class="menuContent" style="display:none; position:fixed;background:#fff; border:1px solid #d5d5d5;z-index:100;">
+        <ul id="categoryTree" name="categoryTree" class="ztree" style="margin-top:0; height: 300px;"></ul>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="Title"> 帮助标题 </label>
+        <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <input type="text" id="Title" name="Title" placeholder="帮助标题" class="col-xs-10 col-sm-5" @(isView ? "readonly=true" : "") value="@Model.Title" />
+            </div>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="Content"> 帮助内容 </label>
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <textarea id="Content" name="Content" placeholder="请填写帮助内容" style="height: 400px;width:100%" class="col-xs-10 col-sm-12" @(isView ? "readonly=true" : "")>@Model.Content</textarea>
+            </div>
+        </div>
+    </div>
+    @{
+        if (!isView)
+        {
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                    &nbsp; &nbsp; &nbsp;
+                    <button class="btn" type="reset">
+                        <i class="icon-undo bigger-110"></i>
+                        重置
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</form>
+
+
+@section Scripts {
+    @Scripts.Render("~/js/ztree")
+    @Scripts.Render("~/js/kindeditor")
+    @Scripts.Render("~/js/admin/jquery-form")
+    <script>
+        @*var url_deleteRelation = "@Url.Action("DeleteRelation", "Merchant", new {area = MerchantModule.Area })";*@
+        var url_loadHelp = "@Url.Action("List", "Admin", new {area = HelpCenterModule.Area })";
+        var categoriesJson = @Html.Raw(ViewBag.CategoriesJson);
+        var zNodes = categoriesJson;
+        var categoryIds = '@ViewBag.CategoryIds';
+        for(var i=0;i<zNodes.length;i++){
+            if(categoryIds.indexOf(zNodes[i].id)>-1){
+                zNodes[i].checked = true;
+                zNodes[i].open=true;
+            }
+        }
+    </script>
+    <script>
+        var editor = KindEditor.ready(function(K) {
+            editor = K.create('#Content', {
+                afterBlur: function () { this.sync(); }
+            });
+        });
+
+    </script>
+    @Scripts.Render("~/js/admin/help/edit")
+}

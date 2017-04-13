@@ -1,0 +1,129 @@
+﻿@using System.Web.Optimization
+@using Autofac
+@using BntWeb.Environment
+@using BntWeb.Security
+@using BntWeb.Security.Identity
+@using Permissions = BntWeb.Merchant.Permissions
+@{
+    ViewBag.Title = MerchantModule.DisplayName;
+    ViewBag.SubTitle = "商家分类";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var user = ViewBag.CurrentUser as User;
+    var authService = HostConstObject.Container.Resolve<IAuthorizationService>();
+}
+@section Styles {
+    @Styles.Render("~/css/ztree")
+    <style type="text/css">
+        .ztree li span.button.add {
+            margin-left: 2px;
+            margin-right: -1px;
+            background-position: -144px 0;
+            vertical-align: top;
+            *vertical-align: middle;
+        }
+    </style>
+}
+<div class="row">
+    <div id="treeParent" class="col-md-4 col-sm-4 col-xm-8" style="overflow-y: auto;">
+        <ul id="tree" class="ztree col-md-12"></ul>
+    </div>
+    <div class="col-md-6 col-sm-6 col-xm-12">
+        <form class="form-horizontal" role="form" id="DistrictForm" action="@Url.Action("EditOnPost", "Admin", new {area = MerchantModule.Area})">
+            <input type="hidden" id="ParentId" name="ParentId" value="0" />
+            <input type="hidden" id="Id" name="Id" value="0" />
+            <!--0:新增统计2子，1:编辑-->
+            <input type="hidden" id="EditMode" name="EditMode" value="0" />
+            <div class="form-group">
+                <label class="col-sm-2 control-label no-padding-right" for="Parent"> 上级分类 </label>
+                <div class="col-sm-9">
+                    <div class="clearfix">
+                        <input type="text" id="MergerId" name="MergerId" readonly="readonly" class="col-sm-6" style="display:none;" value="" />
+                        <input type="text" id="MergerTypeName" name="MergerTypeName" readonly="readonly" class="col-sm-6" style="display:none;" value="" />
+                        <input type="text" id="Parent" name="Parent" readonly="readonly" class="col-sm-6" value="" />
+                    </div>
+                </div>
+            </div>
+            <div class="space-4"></div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label no-padding-right" for="TypeName"> 名称 </label>
+                <div class="col-sm-9">
+                    <div class="clearfix">
+                        <input type="text" id="TypeName" name="TypeName" placeholder="名称" class="col-sm-6" value="" />
+                    </div>
+                </div>
+            </div>
+            <div class="space-4"></div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label no-padding-right" for="Remark"> 备注 </label>
+                <div class="col-sm-9">
+                    <div class="clearfix">
+                        <input type="text" id="Remark" name="Remark" placeholder="备注" class="col-xs-12 col-sm-6" value="" />
+                    </div>
+                </div>
+            </div>
+            <div class="space-4"></div>
+            <div class="form-group" style="display:none;">
+                <label class="col-sm-2 control-label no-padding-right" for="IsShowInNav">显示设置</label>
+                <div class="col-sm-9">
+                    <div class="clearfix">
+                        <input type="text" style="display: none;" id="IsShowInNav" name="IsShowInNav" value="" />
+                        <label class="inline">
+                            <input type="checkbox" id="cboxIsShowInNav" name="cboxIsShowInNav" class="ace" value="1"/>
+                            <span class="lbl">导航栏显示</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="space-4"></div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label no-padding-right" for="Sort"> 排序 </label>
+                <div class="col-sm-9">
+                    <div class="clearfix">
+                        <input type="text" id="Sort" name="Sort" placeholder="排序" class="col-sm-2" value="" />
+                    </div>
+                </div>
+            </div>
+            @if (authService.TryCheckAccess(Permissions.EditMerchantType, user))
+            {
+                <div class="clearfix">
+                    <div class="col-md-2">
+                        &nbsp;
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-info" type="submit" id="SaveButton" style="display: none;">
+                            <i class="icon-ok bigger-110"></i>
+                            保存
+                        </button>
+                    </div>
+                    <div class="col-md-8">
+                        <button class="btn btn-success" type="button" id="SetAdvs" style="display: none;">
+                            <i class="icon-barcode bigger-130"></i>
+                            设为广告
+                        </button>
+                        <button class="btn btn-success" type="button" id="AddCarousel" style="display: none;">
+                            <i class="icon-magic bigger-130"></i>
+                            加入轮播
+                        </button>
+                    </div>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/js/ztree")
+    @Scripts.Render("~/js/admin/jquery-form")
+    <script type="text/javascript">
+        var url_load = "@Url.Action("LoadByParentId", "Admin", new {area = MerchantModule.Area})";
+        var url_deleteMerchantType = "@Url.Action("Delete", "Admin", new {area = MerchantModule.Area})";
+
+        var canEditMerchantType = @authService.TryCheckAccess(Permissions.EditMerchantType, user).ToString().ToLower();
+        var canEditAdvert =@authService.TryCheckAccess("BntWeb-Advertisement-EditAdvertisement", user).ToString().ToLower();
+
+        var url_sendAdvert = "@Url.Action("Send", "Admin", new {area = "Advertisement", sourceType= "MerchantType", sourceId= "[sourceId]", sourceTitle = "[sourceTitle]", viewUrl = "[viewUrl]", moduleKey = MerchantModule.Key, moduleName = MerchantModule.DisplayName })";
+        var url_addCarousel = "@Url.Action("Add", "Admin", new {area = "Carousel", sourceType= "MerchantType", sourceId= "[sourceId]", sourceTitle = "[sourceTitle]", viewUrl = "[viewUrl]", moduleKey = MerchantModule.Key, moduleName = MerchantModule.DisplayName })";
+
+    </script>
+    @Scripts.Render("~/js/admin/merchant/type")
+}

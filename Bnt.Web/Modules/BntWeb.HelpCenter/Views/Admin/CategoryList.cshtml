@@ -1,0 +1,59 @@
+﻿@using System.Web.Optimization
+@using Autofac
+@using BntWeb.Environment
+@using BntWeb.Security
+@using BntWeb.Security.Identity
+@using Permissions = BntWeb.HelpCenter.Permissions
+@{
+    ViewBag.Title = HelpCenterModule.DisplayName;
+    ViewBag.SubTitle = "帮助类别";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var user = ViewBag.CurrentUser as User;
+    var authService = HostConstObject.Container.Resolve<IAuthorizationService>();
+}
+@section Styles {
+    @Styles.Render("~/css/ztree")
+    <style type="text/css">
+        .ztree li span.button.add {
+            margin-left: 2px;
+            margin-right: -1px;
+            background-position: -144px 0;
+            vertical-align: top;
+            *vertical-align: middle;
+        }
+    </style>
+}
+@section HeaderRight {
+    @if (authService.TryCheckAccess(Permissions.EditHelpCategory, user))
+    {
+        <a class="btn btn-info publish" href="">
+            <i class="icon-plus bigger-110"></i>
+            新增
+        </a>
+    }
+}
+
+
+
+<div class="row">
+    <div class="col-sm-12" id="HelpCategoryList">
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/js/admin/jquery-nestable")
+    <script type="text/javascript">
+        var url_load = "@Url.Action("Load", "Admin", new {area = HelpCenterModule.Area })";
+        var url_deleteCategory = "@Url.Action("DeleteCategory", "Admin", new {area = HelpCenterModule.Area })";
+        var url_viewHelp = "@Url.Action("List","Admin", new { area = HelpCenterModule.Area })";
+
+        var canEditHelpCategory = @authService.TryCheckAccess(Permissions.EditHelpCategory, user).ToString().ToLower();
+        var canDeleteHelpCategory=@authService.TryCheckAccess(Permissions.DeleteHelpCategory, user).ToString().ToLower();
+
+        var url_editCategory = "@Url.Action("CategoryEdit", "Admin", new {area = HelpCenterModule.Area })";
+        $(".publish").attr("href", url_editCategory + "?id=00000000-0000-0000-0000-000000000000&parentId=00000000-0000-0000-0000-000000000000");
+    </script>
+    @Scripts.Render("~/js/admin/helpcenter/categorylist")
+}

@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = SystemMessageModule.DisplayName;
+    ViewBag.SubTitle = "系统消息";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@using System.Web.Optimization
+@model BntWeb.SystemMessage.Models.SystemMessage
+<div class="col-md-8 col-sm-8 col-xm-12">
+    <form class="form-horizontal" role="form" id="SystemMessageForm" action="@Url.Action("EditOnPost", "Admin", new { area = SystemMessageModule.Area })">
+        <div class="form-group">
+            <label class="col-sm-1 control-label no-padding-right" for="Title"> 标题 </label>
+            <div class="col-sm-9">
+                <div class="clearfix">
+                    <input type="text" id="Title" name="Title" placeholder="标题" class="col-xs-10 col-sm-5" value="@Model.Title" />
+                </div>
+            </div>
+        </div>
+        <div class="space-4"></div>
+        <div class="form-group">
+            <label class="col-sm-1 control-label no-padding-right" for="Content"> 消息内容 </label>
+            <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+            <div class="col-sm-9">
+                <div class="clearfix">
+                    <textarea id="Content" name="Content" placeholder="请填写消息内容" maxlength="200" style="height: 120px;" class="col-xs-10 col-sm-5">@Model.Content</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="clearfix">
+            <div class="col-md-offset-3 col-md-9">
+                <button class="btn btn-info" type="submit">
+                    <i class="icon-ok bigger-110"></i>
+                    保存
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/js/admin/jquery-form")
+    <script type="text/javascript">
+        jQuery(function($) {
+            bntToolkit.initForm($("#SystemMessageForm"), {
+                Content: {
+                    required: true
+                }
+            }, null, success);
+        });
+
+        // post-submit callback
+        function success(result, statusText, xhr, $form) {
+            if (!result.Success) {
+                bntToolkit.error(result.ErrorMessage);
+            } else {
+                location.href = "@Url.Action("List", "Admin", new {area = SystemMessageModule.Area})";
+            }
+        }
+
+    </script>
+}

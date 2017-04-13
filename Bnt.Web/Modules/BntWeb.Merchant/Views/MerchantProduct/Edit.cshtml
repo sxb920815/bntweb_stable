@@ -1,0 +1,247 @@
+﻿@using System.Web.Optimization
+@using BntWeb.Merchant.Models
+@using BntWeb.Merchant.ViewModels
+@using BntWeb.FileSystems.Media
+@using BntWeb.Security.Identity
+@{
+    ViewBag.Title = MerchantModule.DisplayName;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var merchantList = ViewBag.MerchantList as List<MerchantSelect>;
+    var editMode = (bool)ViewBag.EditMode;
+    var isCreate = (bool)ViewBag.IsCreate;
+    if (!editMode)
+    {
+        ViewBag.SubTitle = "查看优惠信息";
+    }
+    else
+    {
+        if (isCreate)
+        {
+            ViewBag.SubTitle = "新增优惠信息";
+        }
+        else
+        {
+            ViewBag.SubTitle = "编辑优惠信息";
+        }
+    }
+}
+@model MerchantProduct
+@section Styles {
+    @Styles.Render("~/css/ztree")
+    <style type="text/css">
+        .ace-thumbnails > li {
+            border: 1px solid #ddd;
+        }
+    </style>
+}
+<form class="form-horizontal" role="form" method="POST" id="MerchantProductForm" action="@Url.Action("EditOnPost", "MerchantProduct", new { area = MerchantModule.Area })">
+    <div class="col-sm-12 widget-container-span" style="padding:0px;">
+        <div class="widget-box" style="margin:0px;">
+            <div class="widget-header" style="background-color:#fff;background-image:none;border:0px;    border-bottom: 1px solid #DDD;">
+                <div class="widget-toolbar no-border" style="float:left;">
+                    <ul class="nav nav-tabs" id="myTab2">
+                        <li class="active">
+                            <a data-toggle="tab" href="#basic">基本信息</a>
+                        </li>
+                        <li>
+                            <a data-toggle="tab" href="#imageInfo">图片信息</a>
+                        </li>
+                        <li>
+                            <a href="@Url.Action("List", "MerchantProduct", new {area = MerchantModule.Area,merchantId = ViewBag.MerchantId })">返回优惠列表</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="widget-body" style="border:0px;">
+                <div class="widget-main padding-12 no-padding-left no-padding-right">
+                    <div class="tab-content padding-4">
+                        <div id="basic" class="tab-pane in active">
+                            <div class="slim-scroll">
+                                <div class="space-4"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label no-padding-right" for="MerchantId"> 选择商家 </label>
+                                    <div class="col-sm-9">
+                                        <span class="input-icon">
+                                            <select class="form-control" id="MerchantId" name="MerchantId" @(editMode ? "" : "readonly=readonly")>
+                                                <option value="">请选择商家</option>
+                                                @{
+                                                    if (merchantList != null)
+                                                    {                                                        
+                                                        foreach (var type in merchantList)
+                                                        {                                                                
+                                                            <option value="@type.MerchantId" @(Model.MerchantId == type.MerchantId ? "selected=selected" : "")>@type.MerchantName</option>
+
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="space-4"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label no-padding-right" for="ProductName"> 优惠信息名称 </label>
+                                    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+                                    <div class="col-sm-9">
+                                        <div class="clearfix">
+                                            <input type="text" id="ProductName" name="ProductName" placeholder="优惠信息名称" class="col-xs-10 col-sm-5" @(editMode ? "" : "readonly=readonly") value="@Model.ProductName" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-4"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label no-padding-right" for="Intro"> 简介 </label>
+                                    <div class="col-sm-9">
+                                        <div class="clearfix">
+                                            <textarea id="Intro" name="Intro" placeholder="简介,100字以内" maxlength="100" style="height: 100px;width:100%" class="col-xs-10 col-sm-12" @(editMode ? "" : "readonly=readonly")>@Model.Intro</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-4"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label no-padding-right" for="Address"> 显示设置 </label>
+                                    <div class="col-sm-9">
+                                        <div class="clearfix">
+                                            <input type="text" style="display: none;" id="IsShowInFront" name="IsShowInFront" value="@(Model.IsShowInFront?"true":"false")" />
+                                            <label class="inline">
+                                                <input type="checkbox" id="cboxIsShowInFront" name="cboxIsShowInFront" class="ace" value="1" @(Model.IsShowInFront ? "checked='checked'" : "") />
+                                                <span class="lbl">设为前端显示</span>
+                                            </label>
+
+                                            <input type="text" style="display: none;" id="IsRecommend" name="IsRecommend" value="@(Model.IsRecommend?"true":"false")" />
+                                            <label class="inline">
+                                                <input type="checkbox" id="cboxIsRecommend" name="cboxIsRecommend" class="ace" value="1" @(Model.IsRecommend ? "checked='checked'" : "") />
+                                                <span class="lbl">设为推荐</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-4"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label no-padding-right" for="Detail"> 详细信息 </label>
+                                    <div class="col-sm-9">
+                                        <div class="clearfix">
+                                            <textarea id="DetailHtml" name="DetailHtml" placeholder="请填写详细信息" style="height: 400px;width:100%" class="col-xs-10 col-sm-12" @(editMode ? "" : "readonly=readonly")>@Model.Detail</textarea>
+                                            <input id="Detail" name="Detail" style="display:none" value="@Model.Detail" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="imageInfo" class="tab-pane">
+                            <div class="slim-scroll" data-height="100">
+                                <div class="space-4"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label no-padding-right"> 主图 </label>
+                                    <div class="col-sm-8 image">
+                                        <div class="col-sm-10">
+                                            @Html.Action("UploadPartial", "File", new { area = "SystemSettings", controlId = "MainImage", editMode, sourceId = Model.Id, moduleKey = MerchantModule.Key, sourceType = "MainImage", fileType = FileType.Image, isPublic = false, mediumThumbnailHeight = 200, mediumThumbnailWidth = 200, smallThumbnailWidth = 100, smallThumbnailHeight = 100, thumbnailType = ThumbnailType.TakeCenter })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-4"></div>
+                                <div class="form-group">
+                                    <label class="col-sm-1 control-label no-padding-right"> 背景图 （可多图）</label>
+                                    <div class="col-sm-8 image">
+                                        <div class="col-sm-10">
+                                            @Html.Action("UploadPartial", "File", new { area = "SystemSettings", controlId = "ProductImages", maxFiles = 10, editMode, sourceId = Model.Id, moduleKey = MerchantModule.Key, sourceType = "ProductImages", fileType = FileType.Image, isPublic = false, mediumThumbnailHeight = 428, mediumThumbnailWidth = 320, smallThumbnailWidth = 214, smallThumbnailHeight = 160 })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @{
+        if (editMode)
+        {
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9" style="margin-top: 18px;">
+                    <button class="btn btn-info" type="submit" onclick="setText()">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                    &nbsp; &nbsp; &nbsp;
+                    @if (editMode)
+                    {
+                        <button class="btn" type="reset">
+                            <i class="icon-undo bigger-110"></i>
+                            重置
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    }
+</form>
+@section Scripts {
+    @Scripts.Render("~/js/ztree")
+    @Scripts.Render("~/js/kindeditor")
+    @Scripts.Render("~/js/admin/jquery-form")
+    <script>
+        var url_loadMerchant = "@Url.Action("List", "MerchantProduct", new {area = MerchantModule.Area,merchantId = ViewBag.MerchantId })";
+    </script>
+    <script>
+        var editor = KindEditor.ready(function (K) {
+            editor = K.create('#DetailHtml');
+        });
+        function setText() {
+            editor.sync();
+            $("#Detail").val(editor.html());//原生API
+
+        }
+
+
+        jQuery(function ($) {
+            bntToolkit.initForm($("#MerchantProductForm"), {
+                ProductName: {
+                    required: true,
+                    maxlength: 100
+                },
+                Intro: {
+                    required: true,
+                    maxlength: 100
+                },
+                Detail: {
+                    required: true
+                },
+                MerchantId: {
+                    required:true
+                },
+            }, null, success);
+
+
+            $("#cboxIsShowInFront").click(function () {
+                $("#IsShowInFront").val($("#cboxIsShowInFront").is(':checked'));
+            });
+            $("#cboxIsRecommend").click(function () {
+                $("#IsRecommend").val($("#cboxIsRecommend").is(':checked'));
+            });
+        });
+
+        // post-submit callback
+        function success(result, statusText, xhr, $form) {
+            if (!result.Success) {
+                bntToolkit.error(result.ErrorMessage);
+            } else {
+                location.href = url_loadMerchant;
+            }
+        }
+        function deleteRelation(imageId, merchantId) {
+            bntToolkit.post(url_deleteRelation, { imageId: imageId, companyId: merchantId }, function (result) {
+                if (result.Success) {
+                    $("#background_" + imageId).remove();
+                } else {
+                    bntToolkit.error(result.ErrorMessage);
+                }
+            });
+        }
+    </script>
+}

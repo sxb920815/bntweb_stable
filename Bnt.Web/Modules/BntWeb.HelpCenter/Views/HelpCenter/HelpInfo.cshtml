@@ -1,0 +1,41 @@
+﻿
+@{
+    Layout = null;
+    ViewBag.Title = "HelpInfo";
+}
+@using System.Web.Optimization
+@model BntWeb.HelpCenter.Models.Help
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="content-language" content="zh-CN" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="杭州博采网络科技股份有限公司-高端网站建设-http://www.bocweb.cn" />
+    <meta name="renderer" content="webkit">
+    <title></title>
+    @Styles.Render("~/css/helpcenter")
+    @Scripts.Render("~/js/helpcenter")
+</head>
+<body class="cl0">
+    <div class="newstitle">
+        <div class="w94 item">@Model.Title</div>
+        <div class="w94 name">
+            <span>@Model.HelpCategory.Name</span>
+            <span>@Model.CreateName</span>
+            <span>@Model.CreateTime</span>
+        </div>
+    </div>
+    <div class="news-con w94">
+
+        @MvcHtmlString.Create(Model.Content)
+    </div>
+</body>
+</html>

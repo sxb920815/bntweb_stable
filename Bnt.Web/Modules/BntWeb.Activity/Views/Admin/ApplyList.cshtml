@@ -1,0 +1,50 @@
+﻿@using System.Web.Optimization
+@{
+    ViewBag.Title = ActivityModule.DisplayName;
+    ViewBag.SubTitle = "活动报名人员";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model BntWeb.Activity.Models.Activity
+<style>
+    .dataTable th.sorting_disabled {
+        color: #707070;
+    }
+</style>
+<input type="hidden" id="ActivityId" name="ActivityId" value="@Model.Id"/>
+<div class="row">
+    <div class="col-xs-12">
+        <h3>【@Model.Title】 活动报名人员列表</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <div class="table-responsive">
+            <table id="ActivityTypeTable" class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th class="col-xs-2">
+                            姓名
+                        </th>
+                        <th class="col-xs-2">
+                            电话
+                        </th>
+                        <th class="col-xs-5">
+                            备注
+                        </th>
+                        <th class="col-xs-3">
+                            报名时间
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @Scripts.Render("~/js/admin/jquery-datatable")
+    <script type="text/javascript">
+        var url_loadPage = "@Url.Action("GetApplyList", "Admin", new {area = ActivityModule.Area, activityId = Model.Id })";
+    </script>
+    @Scripts.Render("~/js/admin/activitys/apply/list")
+}

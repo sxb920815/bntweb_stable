@@ -1,0 +1,78 @@
+﻿@using System.Web.Optimization
+@using BntWeb.FileSystems.Media
+@using BntWeb.Merchant.Models
+@{
+    Layout = null;
+    var productImages = ViewBag.ProductImages as List<StorageFile> ?? new List<StorageFile>();
+    var merchant = ViewBag.Merchant ?? new Merchant();
+
+}
+@model BntWeb.Merchant.Models.MerchantProduct
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="content-language" content="zh-CN" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="杭州博采网络科技股份有限公司-高端网站建设-http://www.bocweb.cn" />
+    <meta name="render" content="webkit">
+    <title></title>
+    @Scripts.Render("~/web/html/merchant/product/js")
+    @Styles.Render("~/web/merchant/css")
+</head>
+<body class="bgbody">
+    <div class="iban swiper-container">
+        <div class="swiper-wrapper">
+            @{
+                foreach (var img in productImages)
+                {
+                    <div class="swiper-slide">
+                        <a href="#"><img src="@Url.Content("~/" + img.RelativePath)" width="100%" alt=""></a>
+                    </div>
+                }
+            }
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
+    <div class="probox_fi">
+        <h2>商家信息</h2>
+        <div class="txt f-cb">
+            <div class="left fl">
+                <h3>@merchant.MerchantName</h3>
+                <p>@merchant.Address</p>
+            </div>
+            <div class="tel fr">
+                <a href="tel:@merchant.PhoneNumber"><img src="~/Resources/Web/Images/tel.png" width="25" alt=""></a>
+            </div>
+
+        </div>
+    </div>
+    <div class="probox_sec">
+        <h2>优惠信息</h2>
+        <div class="txt">
+            <h3>@Model.ProductName</h3>
+            <p>@Model.Intro</p>
+        </div>
+        <div class="cont">
+            @Html.Raw(Model.Detail)
+        </div>
+    </div>
+    <script>
+        $(function () {
+            var mySwiper = new Swiper('.iban', {
+                pagination: '.swiper-pagination',
+                loop: true,
+                paginationClickable: true,
+                autoplay: 3500
+            });
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+﻿@using System.Web.Optimization
+@using BntWeb.Activity.Models
+@using BntWeb.FileSystems.Media
+@using BntWeb.Security.Identity
+@{
+    ViewBag.Title = ActivityModule.DisplayName;
+    ViewBag.SubTitle = "发布官方活动";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var activityTypeList = ViewBag.ActivityType as List<ActivityType>;
+    var editMode = (bool)ViewBag.EditMode;
+    var isView = (bool)ViewBag.IsView;
+    if (isView)
+    {
+        ViewBag.SubTitle = "查看活动";
+    }
+    else
+    {
+        if (Model.Id != Guid.Empty)
+        {
+            ViewBag.SubTitle = "编辑活动";
+        }
+        else if (Model.Id == Guid.Empty)
+        {
+            ViewBag.SubTitle = "新增官方认证活动";
+        }
+    }
+}
+@model Activity
+
+<form class="form-horizontal" role="form" method="POST" id="ActivityForm" action="@Url.Action("EditOnPost", "Admin", new { area = ActivityModule.Area })">
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="Title"> 活动名称 </label>
+        <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <input type="text" id="Title" name="Title" placeholder="用户名" class="col-xs-10 col-sm-5" @(editMode ? "" : "readonly=true") value="@Model.Title" />
+            </div>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right"> 活动海报 </label>
+        <div class="col-sm-8 image">
+            <div class="col-sm-10">
+                @Html.Action("UploadPartial", "File", new { area = "SystemSettings", controlId = "CoverImage", editMode = !isView, sourceId = Model.Id, moduleKey = ActivityModule.Key, sourceType = "ActivityImage", fileType = FileType.Image, isPublic = false, mediumThumbnailHeight = 300, mediumThumbnailWidth = 400, smallThumbnailWidth = 200, smallThumbnailHeight = 150, thumbnailType = ThumbnailType.TakeCenter })
+            </div>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="StartTime"> 开始时间 </label>
+        <div class="col-sm-9">
+            <span class="input-icon">
+                <input type="text" id="StartTime" name="StartTime" placeholder="开始时间" style="width:300px;" @(editMode ? "" : "readonly=true") value="@(Model.StartTime == null ? "" : Model.StartTime.ToString("yyyy-MM-dd HH:mm:ss"))" />
+                <i class="icon-calendar light-orange"></i>
+            </span>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="EndTime"> 结束时间 </label>
+        <div class="col-sm-9">
+            <span class="input-icon">
+                <input type="text" id="EndTime" name="EndTime" placeholder="结束时间" style="width: 300px;" @(editMode ? "" : "readonly=true") value="@(Model.EndTime == null ? "" : Model.EndTime.ToString("yyyy-MM-dd HH:mm:ss"))" />
+                <i class="icon-calendar light-orange"></i>
+            </span>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="Postion"> 活动地点 </label>
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <input type="text" id="Postion" name="Postion" placeholder="活动地点" class="col-xs-10 col-sm-5" @(editMode ? "" : "readonly=true") value="@Model.Postion" />
+            </div>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="TypeId"> 活动类别 </label>
+        <div class="col-sm-9">
+            <span class="input-icon">
+                <select class="form-control" id="TypeId" name="TypeId">
+                    @{
+                        if (activityTypeList != null)
+                        {
+                            if (Model.Id == Guid.Empty)
+                            {
+                                foreach (var type in activityTypeList)
+                                {
+                                    if (type.TypeName.Contains("官方") && Model.Id == Guid.Empty)
+                                    {
+                                        <option value="@type.Id" @(Model.TypeId == type.Id ? "selected=selected" : "")>@type.TypeName</option>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                foreach (var type in activityTypeList)
+                                {
+                                    if (type.Id == Model.TypeId)
+                                    {
+                                        <option value="@type.Id" @(Model.TypeId == type.Id ? "selected=selected" : "")>@type.TypeName</option>
+                                    }
+                                }
+                            }
+                        }
+                    }
+                </select>
+            </span>
+        </div>
+    </div>
+    <div class="space-4"></div>
+    <div class="form-group">
+        <label class="col-sm-1 control-label no-padding-right" for="Description"> 活动介绍 </label>
+        <div class="col-sm-9">
+            <div class="clearfix">
+                <textarea id="Description" name="Description" placeholder="请填写相关活动介绍，200字以内" maxlength="200" style="height: 120px;" class="col-xs-10 col-sm-5" @(editMode ? "" : "readonly=true")>@Model.Description</textarea>
+            </div>
+        </div>
+    </div>
+    @{
+        if (!isView)
+        {
+            <div class="clearfix form-actions">
+                <div class="col-md-offset-3 col-md-9">
+                    <button class="btn btn-info" type="submit">
+                        <i class="icon-ok bigger-110"></i>
+                        保存
+                    </button>
+                    &nbsp; &nbsp; &nbsp;
+                    @if (editMode)
+                    {
+                        <button class="btn" type="reset">
+                            <i class="icon-undo bigger-110"></i>
+                            重置
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    }
+</form>
+@section Scripts {
+    @Scripts.Render("~/js/admin/jquery-form")
+    <script type="text/javascript">
+        var editMode = @editMode.ToString().ToLower();
+        jQuery(function($) {
+            if (editMode) {
+                var options = $.datepicker.regional["zh-CN"];
+                options["dateFormat"] = "yy-mm-dd";
+                $("#StartTime").datetimepicker(options);
+                $("#EndTime").datetimepicker(options);
+            }
+
+            bntToolkit.initForm($("#ActivityForm"), {
+                Title: {
+                    required: true,
+                    maxlength: 50
+                },
+                StartTime: {
+                    required: true
+                },
+                EndTime: {
+                    required: true
+                },
+                Postion: {
+                    required: true,
+                    maxlength: 100
+                },
+                Description: {
+                    required: true,
+                    maxlength: 200
+                }
+            }, null, success);
+        });
+
+        // post-submit callback
+        function success(result, statusText, xhr, $form) {
+            if (!result.Success) {
+                bntToolkit.error(result.ErrorMessage);
+            } else {
+                location.href = "@Url.Action("List", "Admin", new {area = ActivityModule.Area})";
+            }
+        }
+
+    </script>
+}

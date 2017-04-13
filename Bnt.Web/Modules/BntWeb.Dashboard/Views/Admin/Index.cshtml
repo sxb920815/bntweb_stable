@@ -1,0 +1,232 @@
+﻿@inherits System.Web.Mvc.WebViewPage
+@{
+    ViewBag.Title = "控制台";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="alert alert-block alert-success">
+    <button type="button" class="close" data-dismiss="alert">
+        <i class="icon-remove"></i>
+    </button>
+
+    <i class="icon-ok green"></i>
+
+    欢迎使用
+    <strong class="green">
+        BntWeb管理系统
+        <small>(v1.1)</small>
+    </strong>
+    ，这是博采网络 .NET 团队倾力打造的全新管理平台。
+</div>
+
+
+<div class="row">
+    <div class="space-6"></div>
+
+    <div class="col-sm-6 infobox-container">
+        <div class="infobox infobox-green  ">
+            <div class="infobox-icon">
+                <i class="icon-money"></i>
+            </div>
+
+            <div class="infobox-data">
+                <span class="infobox-data-number">￥@ViewBag.SalesAmountToday</span>
+                <div class="infobox-content">今日销售额</div>
+            </div>
+        </div>
+
+        <div class="infobox infobox-blue  ">
+            <div class="infobox-icon">
+                <i class="icon-shopping-cart"></i>
+            </div>
+
+            <div class="infobox-data">
+                <span class="infobox-data-number">@ViewBag.SalesVolumeToday</span>
+                <div class="infobox-content">今日订单</div>
+            </div>
+        </div>
+
+        <div class="infobox infobox-pink  ">
+            <div class="infobox-icon">
+                <i class="icon-user"></i>
+            </div>
+
+            <div class="infobox-data">
+                <span class="infobox-data-number">@ViewBag.NewMembersToday</span>
+                <div class="infobox-content">今日新增会员</div>
+            </div>
+        </div>
+
+        <div class="infobox infobox-red">
+            <div class="infobox-icon">
+                <i class="icon-star"></i>
+            </div>
+
+            <div class="infobox-data">
+                <span class="infobox-data-number">@ViewBag.InventoryWarning</span>
+                <div class="infobox-content">缺货商品</div>
+            </div>
+        </div>
+
+        <div class="space-6"></div>
+
+        <div class="infobox infobox-orange infobox-small infobox-dark">
+            <div class="infobox-progress">
+                <label style="font-size:28px;">@ViewBag.PendingPayment</label>
+            </div>
+
+            <div class="infobox-data">
+                <div class="infobox-content">待支付</div>
+                <div class="infobox-content">订单</div>
+            </div>
+        </div>
+
+        <div class="infobox infobox-green2 infobox-small infobox-dark">
+            <div class="infobox-progress">
+                <label style="font-size: 28px;">@ViewBag.WaitingForDelivery</label>
+            </div>
+
+            <div class="infobox-data">
+                <div class="infobox-content">待发货</div>
+                <div class="infobox-content">订单</div>
+            </div>
+        </div>
+
+        <div class="infobox infobox-orange2 infobox-small infobox-dark">
+            <div class="infobox-progress">
+                <label style="font-size: 28px;">@ViewBag.DeliveryReminders</label>
+            </div>
+            <div class="infobox-data">
+                <div class="infobox-content">催发货</div>
+                <div class="infobox-content">提醒</div>
+            </div>
+        </div>
+
+        <div class="infobox infobox-green infobox-small infobox-dark">
+            <div class="infobox-progress">
+                <label style="font-size:28px;">@ViewBag.WaitingForReceiving</label>
+            </div>
+
+            <div class="infobox-data">
+                <div class="infobox-content">待收货</div>
+                <div class="infobox-content">订单</div>
+            </div>
+        </div>
+
+        <div class="infobox infobox-red infobox-small infobox-dark">
+            <div class="infobox-progress">
+                <label style="font-size:28px;">@ViewBag.Refunding</label>
+            </div>
+
+            <div class="infobox-data">
+                <div class="infobox-content">退款中</div>
+                <div class="infobox-content">订单</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="vspace-sm"></div>
+
+    <div class="col-sm-6 infobox-container">
+        <div id="SalesAmountChart" style="width:100%; height: 260px;"></div>
+    </div><!-- /span -->
+</div><!-- /row -->
+<div style="height:60px;"></div>
+<div class="row">
+    <div class="col-sm-6">
+        <div id="SalesVolumeChart" style="width: 100%; height: 260px;"></div>
+    </div>
+
+    <div class="col-sm-6">
+        <div id="MembersChart" style="width: 100%; height: 260px;"></div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/js/echarts")
+
+    <script type="text/javascript">
+        jQuery(function () {
+            var salesTicks = @MvcHtmlString.Create(ViewBag.StatisticSalesTicks);
+            var salesAmount =  @MvcHtmlString.Create(ViewBag.StatisticSalesAmount);
+            var salesVolume = @MvcHtmlString.Create(ViewBag.StatisticSalesVolume);
+
+            // 基于准备好的dom，初始化echarts实例
+            var salesAmountChart = echarts.init(document.getElementById('SalesAmountChart'));
+            // 使用刚指定的配置项和数据显示图表。
+            salesAmountChart.setOption({
+                title: {
+                    text: '月销售额'
+                },
+                tooltip: {},
+                xAxis: {
+                    data: salesTicks
+                },
+                yAxis: {},
+                series: [{
+                    name: '销售额',
+                    type: 'line',
+                    data: salesAmount,
+                    itemStyle: {
+                        normal: {
+                            color: "#6fb3e0"
+                        }
+                    }
+                }]
+            });
+
+            // 基于准备好的dom，初始化echarts实例
+            var salesVolumeChart = echarts.init(document.getElementById('SalesVolumeChart'));
+            // 使用刚指定的配置项和数据显示图表。
+            salesVolumeChart.setOption({
+                title: {
+                    text: '月销量'
+                },
+                tooltip: {},
+                xAxis: {
+                    data: salesTicks
+                },
+                yAxis: {},
+                series: [{
+                    name: '销量',
+                    type: 'line',
+                    data: salesVolume,
+                    itemStyle: {
+                        normal: {
+                            color: "#cb6fd7"
+                        }
+                    }
+                }]
+            });
+
+            var membersTicks = @MvcHtmlString.Create(ViewBag.StatisticMembersTicks);
+            var membersAmount =  @MvcHtmlString.Create(ViewBag.StatisticMembersAmount);
+
+            // 基于准备好的dom，初始化echarts实例
+            var membersChart = echarts.init(document.getElementById('MembersChart'));
+            // 使用刚指定的配置项和数据显示图表。
+            membersChart.setOption({
+                title: {
+                    text: '月新增会员'
+                },
+                tooltip: {},
+                xAxis: {
+                    data: membersTicks
+                },
+                yAxis: {},
+                series: [{
+                    name: '数量',
+                    type: 'bar',
+                    data: membersAmount,
+                    itemStyle: {
+                        normal: {
+                            color: "#0490a6"
+                        }
+                    }
+                }]
+            });
+
+        });
+    </script>
+}
